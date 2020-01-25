@@ -45,31 +45,71 @@ public class Blockchain {
     // Méthode qui permet de vérifier que la méthode de notre blockchain est bien valide.
     // Ce block est valide si son index est égal à 0 et que le previsousHash est null et que le hash courant est cohérent
     public boolean isFirstBlockValid(){
+        Block firstBlock = blocks.get(0);
+
+        if (firstBlock.getIndex() != 0){
+            return false;
+        }
+
+        if (firstBlock.getPreviousHash() != null) {
+            return false;
+        }
+
+        if (firstBlock.getHash() == null || !Block.calculateHash(firstBlock).equals(firstBlock.getHash())){
+            return false;
+        }
+        return true;
+    }
+
+    // Méthode pour vérifier que le nouveau block est valide par rapport au block précédent.
+    // Pour cela on va vérifier que l'index est égal à sa valeur -1, cohérence du previsousHash et du hash du block courant
+    public boolean isValidNewBlock(Block newBlock, Block previousBlock) {
+        if (newBlock != null && previousBlock != null) {
+            if (previousBlock.getIndex() + 1 != newBlock.getIndex()) {
+                return false;
+            }
+
+            if (newBlock.getPreviousHash() == null || !newBlock.getPreviousHash().equals(previousBlock.getHash())) {
+                return false;
+            }
+
+            if (newBlock.getHash() == null || !Block.calculateHash(newBlock).equals(newBlock.getHash())) {
+                return false;
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    // Méthode pour valider que notre blockchain est valide. Pour garder l'intégrité de notre blockchain
+    // Pour cela tous les noeuds doivent être valide. On va itérer sur le contenu de chaque block de la blockchain et vérifier que le premier block est bien valide
+
+    public boolean isBlockChainValid() {
+        if (!isFirstBlockValid()) {
+            return false;
+        }
+
+        for (int i = 1; i < blocks.size(); i++) {
+            Block currentBlock = blocks.get(i);
+            Block previousBlock = blocks.get(i - 1);
+
+            if (!isValidNewBlock(currentBlock, previousBlock)) {
+                return false;
+            }
+        }
 
         return true;
     }
 
+    // On va surcharger la méthode toString de l'objet Blockchain pour pouvoir retourner sous forme de String le contenu de notre Blockchain
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        for (Block block : blocks) {
+            builder.append(block).append("\n");
+        }
+        return builder.toString();
+    }
 
 }
